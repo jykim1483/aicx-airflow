@@ -1,0 +1,13 @@
+[project]
+name = "customer-data-ingestion"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "pymongo>=4.0,<4.11",
+    "psycopg2-binary>=2.9,<3.0",
+    "PyYAML>=6.0,<7.0",
+    "clickhouse-connect>=0.8,<0.9",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

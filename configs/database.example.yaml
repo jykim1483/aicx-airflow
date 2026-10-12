@@ -1,0 +1,44 @@
+# Database inventory and connection template.
+# Passwords and credential-bearing URIs must be supplied through Secrets/env vars.
+
+dev:
+  postgres: {}
+  alloydb: {}
+  mongodb: {}
+  clickhouse: {}
+
+stg:
+  postgres: {}
+  alloydb: {}
+  mongodb: {}
+  clickhouse: {}
+
+prod:
+  postgres: {}
+  alloydb: {}
+  mongodb:
+    G2_MongoDBSt_ats_45:
+      host: 172.16.31.132
+      port: 27017
+      database: Statistics
+      username: "${PROD_MONGO_USERNAME}"
+      password: "${PROD_MONGO_PASSWORD}"
+      authentication_database: admin
+    G2_MongoDB_Recom:
+      host: 172.16.90.190
+      port: 27017
+      database: RecommendBase
+      username: grb-admin
+      password: "6!uRIEgd%mDIe8!Z2OE6q&7%J@Wt&Cld6bbS"
+      authentication_database: admin
+      authentication_mechanism: SCRAM-SHA-256
+
+  clickhouse:
+    groobee:
+      service: groobee
+      environment: prod-kr
+      purpose: 원천 데이터 저장
+      host: 172.16.2.93
+      port: 8123
+      username: ch_admin
+      password: 9cddc7e57a2bfb920fe5ed6e37b903b6c8b9db8fd07e3633

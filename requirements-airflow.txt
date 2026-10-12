@@ -1,0 +1,11 @@
+# Install this file in the Airflow Scheduler/Worker image.
+# Pin the Airflow core version separately and install with the matching
+# constraints file from https://airflow.apache.org/docs/apache-airflow/stable/installation/installing-from-pypi.html
+
+apache-airflow-providers-mongo
+apache-airflow-providers-postgres
+# Used by SQL-compatible database operators/hooks where required.
+apache-airflow-providers-common-sql
+
+# There is no official apache-airflow-providers-clickhouse package.
+clickhouse-driver

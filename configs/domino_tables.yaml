@@ -1,0 +1,35 @@
+tables:
+  - service: behavior_log
+    source_type: mongodb
+    conn_id: G2_MongoDB_Recom
+    database: Statistics
+    table: 'UserDataHistoryDay.0fc41973695d406784c04e121a04cb64'
+  - service: behavior_log
+    source_type: mongodb
+    conn_id: G2_MongoDB_Recom
+    database: RecommendBase
+    table: 'Cart.0fc41973695d406784c04e121a04cb64'
+  - service: behavior_log
+    source_type: mongodb
+    conn_id: G2_MongoDB_Recom
+    database: RecommendBase
+    table: 'Purchase.0fc41973695d406784c04e121a04cb64'
+  - service: sms
+    source_type: mongodb
+    conn_id: prod-g2-service
+    database: Service
+    table: SmsNoti
+
+#  - service: sms
+#    source_type: postgres
+#    conn_id: prod-g2-service
+#    database: postgres
+#    schema: public
+#    table: tbl_send_sms
+#
+#  - service: sms
+#    source_type: postgres
+#    conn_id: prod-g2-service
+#    database: postgres
+#    schema: public
+#    table: tbl_send_sms_target

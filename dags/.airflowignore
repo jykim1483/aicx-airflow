@@ -1,0 +1,6 @@
+# Example / placeholder DAGs
+etl/raw_ingestion_locknlock.py
+
+# Python cache and non-DAG artifacts
+__pycache__
+\.pyc$

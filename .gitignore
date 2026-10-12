@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+configs/database.yaml
+configs/*secret*.yaml
+configs/*secret*.yml
+configs/*credential*.yaml
+configs/*credential*.yml
+
+# IDE / OS
+.idea/
+.DS_Store
