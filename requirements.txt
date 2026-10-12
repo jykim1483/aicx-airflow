@@ -1,4 +1,4 @@
-# Shared data-platform modules
+# Shared aicx-airflow modules
 pymongo>=4.0,<4.11
 psycopg2-binary>=2.9,<3.0
 PyYAML>=6.0,<7.0

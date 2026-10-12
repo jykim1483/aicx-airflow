@@ -54,7 +54,7 @@ flowchart LR
 ## 3. 권장 디렉터리
 
 ```text
-data-platform_temp/
+aicx-airflow/
 ├── dags/                         # Airflow가 직접 로드하는 DAG 진입점
 │   ├── customers/                # 고객사별 DAG 조합·파라미터
 │   │   ├── domino_raw_ingestion.py
@@ -108,4 +108,3 @@ dags/
 EKS에서는 Scheduler, Webserver, Worker가 동일한 DAG 배포본을 봐야 한다. 따라서 DAG를 컨테이너 이미지에 포함하거나 Helm의 Git-sync/Object Storage 방식을 사용하되, 배포 방식을 하나로 통일해야 한다. 하위 디렉터리를 만든 것만으로 Worker 컨테이너에 내부 로직이 공유되지는 않는다.
 
 `KubernetesPodOperator`를 사용할 경우 DAG 파싱 환경과 실제 작업 Pod가 분리된다. Python 의존성과 내부 처리 로직은 작업 이미지에 포함하고, DAG에는 이미지 태그와 실행 파라미터만 전달하는 구성이 안전하다.
-

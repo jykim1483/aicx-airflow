@@ -1,11 +1,11 @@
-# Customer Data Ingestion
+# AICX Airflow
 
 고객사별 MongoDB, PostgreSQL, Athena, S3 원천 데이터를 수집하고 이후 ClickHouse Data Layer로 적재하기 위한 Airflow 기반 데이터 파이프라인 프로젝트입니다.
 
 ## 디렉터리
 
 ```text
-data-platform_temp/
+aicx-airflow/
 ├── dags/                    # Airflow가 로드하는 DAG 진입점
 ├── src/connections/        # 공통 MongoDB/PostgreSQL connection factory
 ├── utils/                   # 이메일 등 공통 보조 모듈

@@ -17,12 +17,12 @@ from src.ingestion.recommand_cart_item import (
 logger = logging.getLogger(__name__)
 
 ALERT_EMAIL_RECIPIENTS = [
-    # "data-platform@example.com",
+    # "aicx-airflow@example.com",
 ]
 
 
 DEFAULT_ARGS = {
-    "owner": "data-platform",
+    "owner": "aicx-airflow",
     "depends_on_past": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),

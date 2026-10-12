@@ -1,5 +1,5 @@
 [project]
-name = "customer-data-ingestion"
+name = "aicx-airflow"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
