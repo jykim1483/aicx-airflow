@@ -5,21 +5,32 @@
 ```text
 aicx-airflow/
 ├── dags/
+│   ├── ods/                            # ODS 적재 DAG 영역
+│   ├── dw/                             # DW 변환 DAG 영역
+│   ├── dm/                             # DM/마트 DAG 영역
 │   └── etl/
-│       └── raw_ingestion_domino.py     # Airflow DAG 진입점
+│       └── raw_ingestion_domino.py     # 현재 Domino raw ingestion DAG
 ├── src/
 │   ├── common/
 │   │   ├── mongodb.py                  # MongoDB 공통 연결/조회
 │   │   ├── clickhouse.py               # ClickHouse 공통 연결/SQL 실행
-│   │   └── postgres.py                 # PostgreSQL 공통 연결/조회
+│   │   └── postgres.py                 # PostgreSQL 공통 연결/SQL 실행
 │   ├── ingestion/
-│   │   └── recommand_cart_item.py      # Domino cart item 조회/검증 로직
+│   │   └── recommand_cart_item.py      # Domino cart item MongoDB -> ClickHouse raw 적재
 │   └── utils/
 │       └── email_sender.py             # SMTP 이메일 발송 유틸
 ├── configs/
 │   ├── database.example.yaml           # DB 접속 설정 예시
 │   └── domino_tables.yaml              # Domino 원천 테이블 설정
 ├── sql/
+│   ├── ods/                            # ODS 적재 SQL 영역
+│   ├── dw/                             # DW 변환 SQL 영역
+│   ├── dm/                             # DM/마트 SQL 영역
+│   ├── ddl/
+│   │   └── create_recommand_cart_item.sql
+│   ├── dml/
+│   │   ├── insert_recommand_cart_item.sql
+│   │   └── select_recommand_cart_item.sql
 │   └── dl/
 │       └── clickhouse_connection_test.sql
 ├── docs/
@@ -30,7 +41,7 @@ aicx-airflow/
 ```
 
 세부 설계 메모는 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)를 참고합니다.
-
+ 
 ## 개발 환경
 
 Python 3.11 이상
@@ -99,7 +110,8 @@ from src.common.mongodb import MongoDBConnection
 mongo = MongoDBConnection(config)
 rows = mongo.select(
     collection="Cart.0fc41973695d406784c04e121a04cb64",
-    query={},
+    query={},          # 전체 조회. 특정 _id 조회 시 {"_id": ObjectId("...")}
+    projection=None,   # None이면 전체 필드 조회
     limit=10,
 )
 mongo.close()
@@ -115,10 +127,47 @@ result = clickhouse.execute("SELECT 1")
 clickhouse.close()
 ```
 
+`execute()`는 SQL 문자열과 `.sql` 파일 경로를 모두 받을 수 있습니다.
+
+```python
+clickhouse.execute("SELECT * FROM groobee_dev.recommand_cart_item_raw LIMIT 10")
+clickhouse.execute(PROJECT_ROOT / "sql" / "ddl" / "create_recommand_cart_item.sql")
+```
+
+PostgreSQL 공통 모듈:
+
+```python
+from src.common.postgres import PostgreSQLConnection
+
+postgres = PostgreSQLConnection(config)
+rowcount = postgres.execute("CREATE TABLE IF NOT EXISTS test_table (id int)")
+postgres.close()
+```
+
+`execute()`는 ClickHouse와 동일하게 SQL 문자열과 `.sql` 파일 경로를 모두 받을 수 있습니다.
+
 Domino cart item 처리 모듈:
 
 ```bash
 PYTHONPATH=. .venv/bin/python -m src.ingestion.recommand_cart_item
+```
+
+현재 처리 흐름:
+
+```text
+MongoDB Cart collection
+-> MongoDB find(query=DEFAULT_QUERY, projection=None, limit=1)
+-> ClickHouse groobee_dev.recommand_cart_item_raw
+```
+
+ClickHouse raw 테이블은 `id`, `reg_dtm`, `raw_json`, `insert_dt` 컬럼을 사용합니다. `insert_dt`는 DDL의 `DEFAULT now64(3)`로 자동 입력되므로 INSERT SQL에는 포함하지 않습니다.
+
+현재 `DEFAULT_QUERY`는 전체 조회 `{}`가 기본이며, 특정 ObjectId만 확인할 때는 다음처럼 변경합니다.
+
+```python
+DEFAULT_QUERY = {
+    "_id": ObjectId("6a571046ba0b69612f31d62f"),
+}
 ```
 
 ## Airflow DAG
