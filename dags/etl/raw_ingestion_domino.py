@@ -1,12 +1,12 @@
 """Domino cart item MongoDB 조회 DAG."""
 
-import logging
 from datetime import timedelta
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
+from src.common.logger import get_logger
 from src.utils.email_sender import send_email
 from src.ingestion.recommand_cart_item import (
     DEFAULT_COLLECTION,
@@ -14,7 +14,7 @@ from src.ingestion.recommand_cart_item import (
 )
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 ALERT_EMAIL_RECIPIENTS = [
     # "aicx-airflow@example.com",
@@ -53,6 +53,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     tags=["ETL", "domino", "mongodb"],
 ) as dag:
+
     recommand_cart_item = PythonOperator(
         task_id="recommand_cart_item",
         python_callable=run_recommand_cart_item,

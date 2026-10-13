@@ -1,5 +1,6 @@
 """ClickHouse 공통 연결 모듈."""
 
+from pathlib import Path
 from typing import Any, Mapping
 
 try:
@@ -28,30 +29,27 @@ class ClickHouseConnection:
             database=self.connection_config.get("database", "default"),
         )
 
-    def execute(self, sql: str, parameters: Mapping[str, Any] | None = None) -> Any:
+    def _resolve_sql(self, sql: str | Path) -> str:
+        """SQL 문자열 또는 .sql 파일 경로를 실행 가능한 SQL 문자열로 변환한다."""
+        if isinstance(sql, Path):
+            return sql.read_text(encoding="utf-8").strip()
+
+        sql_path = Path(sql)
+        if sql_path.suffix == ".sql" and sql_path.exists():
+            return sql_path.read_text(encoding="utf-8").strip()
+
+        return sql
+
+    def execute(
+        self,
+        sql: str | Path,
+        parameters: Mapping[str, Any] | None = None,
+    ) -> Any:
         """DDL/DML SQL을 실행한다."""
         if self.client is None:
             self.connect()
-        return self.client.command(sql, parameters=parameters)
+        return self.client.command(self._resolve_sql(sql), parameters=parameters)
 
-    # def select(
-    #     self,
-    #     sql: str,
-    #     parameters: Mapping[str, Any] | None = None,
-    # ) -> list[tuple[Any, ...]]:
-    #     """SELECT SQL을 실행하고 row 목록을 반환한다."""
-    #     if self.client is None:
-    #         self.connect()
-    #     result = self.client.query(sql, parameters=parameters)
-    #     return result.result_rows
-    #
-    # def create_database(self, database: str) -> None:
-    #     """Database를 생성한다."""
-    #     self.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
-    #
-    # def create_table(self, sql: str) -> None:
-    #     """CREATE TABLE SQL을 실행한다."""
-    #     self.execute(sql)
 
     def close(self) -> None:
         """ClickHouse 연결을 종료한다."""

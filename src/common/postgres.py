@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Mapping
 
 import psycopg2
@@ -21,7 +22,6 @@ class PostgreSQLConnection:
 
     def connect(self) -> None:
         """PostgreSQL connection을 생성한다."""
-        # todo : airflow connection 등록 필요
         conn_id = self.connection_config.get("conn_id")
         if conn_id and PostgresHook is not None:
             self.connection = PostgresHook(postgres_conn_id=conn_id).get_conn()
@@ -40,26 +40,32 @@ class PostgreSQLConnection:
             password=self.connection_config["password"],
         )
 
-    def select(self, sql: str, parameters: tuple | None = None) -> list[tuple]:
-        """SELECT SQL을 실행하고 결과를 반환한다."""
+    def _resolve_sql(self, sql: str | Path) -> str:
+        """SQL 문자열 또는 .sql 파일 경로를 실행 가능한 SQL 문자열로 변환한다."""
+        if isinstance(sql, Path):
+            return sql.read_text(encoding="utf-8").strip()
+
+        sql_path = Path(sql)
+        if sql_path.suffix == ".sql" and sql_path.exists():
+            return sql_path.read_text(encoding="utf-8").strip()
+
+        return sql
+
+    def execute(
+        self,
+        sql: str | Path,
+        parameters: tuple | Mapping[str, Any] | None = None,
+    ) -> int:
         if self.connection is None:
             self.connect()
         with self.connection.cursor() as cursor:
-            cursor.execute(sql, parameters)
-            return cursor.fetchall()
+            cursor.execute(self._resolve_sql(sql), parameters)
+            rowcount = cursor.rowcount
+        self.connection.commit()
+        return rowcount
 
-    def insert(self, sql: str, rows: list[tuple]) -> int:
-        """INSERT 작업을 수행한다. batch insert 구현은 후속 단계에서 추가한다."""
-        # TODO: psycopg2.extras.execute_values로 batch insert
-        raise NotImplementedError
-
-    def merge(self, sql: str, parameters: tuple | None = None) -> None:
-        """UPSERT/MERGE SQL을 실행한다."""
-        # TODO: transaction, commit/rollback, idempotency 정책 적용
-        raise NotImplementedError
 
     def close(self) -> None:
-        """PostgreSQL connection을 종료한다."""
         if self.connection is not None:
             self.connection.close()
         self.connection = None
